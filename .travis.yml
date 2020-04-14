@@ -2,6 +2,6 @@ language: java
 services:
   - docker
 before_script:
-  - docker build -t uploader .
+  - docker build -t core .
   - docker login -u $DOCKER_USER -p $DOCKER_PASS -e $DOCKER_EMAIL
   - docker push askanio007/uploader
