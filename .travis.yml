@@ -2,5 +2,6 @@ language: java
 services:
   - docker
 before_install:
+  - mvn clean package
   - docker build -f ./Dockerfile -t uploader .
   - docker-compose -f ./docker-compose.yml up -d --force-recreate
