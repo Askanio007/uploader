@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public abstract class BaseUploadServiceTest {
 
-    private final String path ="/home/user/ing/test";
+    private final String path ="./test";
 
     @BeforeEach
     public void setUp() throws IOException {
