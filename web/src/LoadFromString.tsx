@@ -83,7 +83,7 @@ export class LoadFromString extends React.Component<LoadFromStringProps, LoadFro
             <div>
                 {inputs}
                 <Button variant="contained" color="primary" style={{marginRight: 5}} onClick={this.addField}>Add field</Button>
-                <Button variant="contained" color="primary" disabled={inputs.length == 0} style={{marginRight: 5}}  onClick={this.handleUpload}>Upload</Button>
+                <Button variant="contained" color="primary" disabled={inputs.length === 0} style={{marginRight: 5}}  onClick={this.handleUpload}>Upload</Button>
                 <Button variant="contained" color="primary" disabled={!isUpload} onClick={this.handleSave}>Save Mini</Button>
                 <div>{images}</div>
             </div>
