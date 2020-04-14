@@ -15,6 +15,7 @@ const MiniImage = (props:MiniImageProps) => (
         color={[255, 255, 255, 0.6]}
         scale={1.1}
         rotate={0}
+        crossOrigin="anonymous"
     />
 );
 

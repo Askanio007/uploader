@@ -3,23 +3,39 @@ import {Button} from "@material-ui/core";
 import UploadService from "./UploadService";
 import MiniImage from "./MiniImage";
 
-interface ILoadFromFile {
-    list: FileList
+interface LoadFromFileState {
+    isUpload: boolean
+    isMiniUpload: boolean
+    error: string | null
+    list: FileList | null
     editors: any[]
 }
-export default class LoadFromFile extends React.Component<any, ILoadFromFile> {
+export default class LoadFromFile extends React.Component<any, LoadFromFileState> {
 
-    handleMiniImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    state: LoadFromFileState = {
+        isUpload: false,
+        isMiniUpload: false,
+        error: null,
+        list: null,
+        editors: []
+    }
+
+    handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
-            this.setState({
-                list: event.target.files,
-                editors: []
-            })
-            await UploadService.saveFromFile(event.target.files);
+            const files:FileList = event.target.files;
+            UploadService.saveFromFile(files, (res: any) => {
+                this.setState({
+                    isUpload: res.data.error == null,
+                    isMiniUpload: false,
+                    error: res.data.error,
+                    list: files,
+                    editors: []
+                });
+            });
         }
     }
 
-    handelUpload = async () => {
+    handleMiniImage = async () => {
         const files:File[] = await Promise.all(this.state.editors.map(async (editor:any) => {
             return await fetch(editor.getImageScaledToCanvas().toDataURL())
                 .then(res => res.blob())
@@ -27,22 +43,32 @@ export default class LoadFromFile extends React.Component<any, ILoadFromFile> {
                     return new File([blob], "");
                 })
         }));
-        await UploadService.saveMiniImage(files);
+        await UploadService.saveMiniImage(files, (res: any) => {
+            this.setState({
+                isUpload: false,
+                isMiniUpload: res.data.error == null,
+                error: res.data.error,
+                list: null,
+                editors: []
+            });
+        });
     }
 
     setEditorRef = (editor:any) => {
-        let editors = this.state.editors;
-        editors.push(editor);
-        this.setState({
-            list: this.state.list,
-            editors: editors
-        })
+        if (editor != null) {
+            let editors = this.state.editors;
+            editors.push(editor);
+            this.setState({
+                list: this.state.list,
+                editors: editors
+            })
+        }
     }
 
     render() {
         let images:any[] = [];
-        if (this.state != null) {
-            const { list } = this.state;
+        const { list, error, isMiniUpload, isUpload } = this.state;
+        if (list != null) {
             images = Array.from(list).map((f:File) => (<MiniImage source={f} refFunc={this.setEditorRef}/>));
         }
         return (
@@ -50,11 +76,14 @@ export default class LoadFromFile extends React.Component<any, ILoadFromFile> {
                 <div>
                     <Button variant="contained" color="primary" component="label">
                         Upload from file
-                        <input type="file" multiple style={{ display: "none" }} onChange={this.handleMiniImage}/>
+                        <input type="file" multiple style={{ display: "none" }} onChange={this.handleUpload}/>
                     </Button>
-                    <Button variant="contained" color="primary" disabled={this.state == null} onClick={this.handelUpload}>Save</Button>
+                    <Button variant="contained" color="primary" disabled={this.state == null} onClick={this.handleMiniImage}>Save</Button>
                 </div>
-                {images}
+                <div style={{color: 'green'}}>{isUpload ? 'Image upload successfully. Choose mini' : ''}</div>
+                <div style={{color: 'green'}}>{isMiniUpload ? 'Mini image upload successfully.' : ''}</div>
+                <div style={{color: 'red'}}>{error != null ? error : ''}</div>
+                <div>{images}</div>
             </form>
         )
     }

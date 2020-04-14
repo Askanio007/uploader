@@ -4,6 +4,8 @@ import UploadService, {ImageSourceType} from "./UploadService";
 import MiniImage from "./MiniImage";
 
 interface LoadFromStringState {
+    isMiniUpload: boolean
+    error: string | null
     isUpload: boolean
     list: string[]
     editors: any[]
@@ -15,17 +17,24 @@ interface LoadFromStringProps {
 export class LoadFromString extends React.Component<LoadFromStringProps, LoadFromStringState> {
 
     state: LoadFromStringState = {
+        isMiniUpload: false,
+        error: null,
         isUpload: false,
         list: [],
         editors: []
     };
 
     handleUpload = () => {
-        this.setState({
-            isUpload: true,
-            list: this.state.list,
-            editors: this.state.editors
-        })
+        UploadService.saveFromString(this.state.list, this.props.typeSource, (res:any) => {
+            this.setState({
+                isMiniUpload: false,
+                error: res.data.error,
+                isUpload: res.data.error == null,
+                list: this.state.list,
+                editors: this.state.editors
+            })
+        });
+
     }
 
     handleSave = async () => {
@@ -36,8 +45,15 @@ export class LoadFromString extends React.Component<LoadFromStringProps, LoadFro
                     return new File([blob], "");
                 })
         }));
-        await UploadService.saveMiniImage(files);
-        await UploadService.saveFromString(this.state.list, this.props.typeSource);
+        await UploadService.saveMiniImage(files, (res:any) => {
+            this.setState({
+                isMiniUpload: res.data.error == null,
+                error: res.data.error,
+                isUpload: false,
+                list: [],
+                editors: []
+            })
+        });
     }
 
     updateString = (index:number, newValue:string) => {
@@ -53,18 +69,20 @@ export class LoadFromString extends React.Component<LoadFromStringProps, LoadFro
     }
 
     setEditorRef = (editor:any) => {
-        const { list, isUpload } = this.state;
-        let editors = this.state.editors;
-        editors.push(editor);
-        this.setState({
-            isUpload: isUpload,
-            list: list,
-            editors: editors
-        })
+        if (editor != null) {
+            const { list, isUpload } = this.state;
+            let editors = this.state.editors;
+            editors.push(editor);
+            this.setState({
+                isUpload: isUpload,
+                list: list,
+                editors: editors
+            })
+        }
     }
 
     render() {
-        const { list, isUpload } = this.state;
+        const { list, isUpload, isMiniUpload, error } = this.state;
         const { title } = this.props;
         let inputs = list.map((str:string, index:number) => {
             return (<TextField id="outlined-basic"
@@ -85,6 +103,9 @@ export class LoadFromString extends React.Component<LoadFromStringProps, LoadFro
                 <Button variant="contained" color="primary" style={{marginRight: 5}} onClick={this.addField}>Add field</Button>
                 <Button variant="contained" color="primary" disabled={inputs.length === 0} style={{marginRight: 5}}  onClick={this.handleUpload}>Upload</Button>
                 <Button variant="contained" color="primary" disabled={!isUpload} onClick={this.handleSave}>Save Mini</Button>
+                <div style={{color: 'green'}}>{isUpload ? 'Image upload successfully. Choose mini' : ''}</div>
+                <div style={{color: 'green'}}>{isMiniUpload ? 'Mini image upload successfully.' : ''}</div>
+                <div style={{color: 'red'}}>{error != null ? error : ''}</div>
                 <div>{images}</div>
             </div>
         )
