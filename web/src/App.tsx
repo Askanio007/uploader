@@ -1,6 +1,6 @@
 import React from 'react';
 import {AppBar, Box, Container, Tab, Tabs, Typography} from "@material-ui/core";
-import {ImageSourceType} from "./UploadService";
+import {ImageSourceType} from "./service/UploadService";
 import {LoadFromString} from "./LoadFromString";
 import LoadFromFile from "./LoadFromFile";
 

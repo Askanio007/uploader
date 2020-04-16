@@ -2,6 +2,7 @@ package com.demo.uploader.service.impl;
 
 import com.demo.uploader.exception.UploadServiceNotFoundException;
 import com.demo.uploader.model.ImageModel;
+import com.demo.uploader.model.ImageResponseModel;
 import com.demo.uploader.model.ImageSourceType;
 import com.demo.uploader.service.FileUploadService;
 import com.demo.uploader.service.ImageService;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class ImageServiceImpl implements ImageService {
@@ -27,14 +29,14 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void upload(MultipartFile[] files) {
-        fileUploadService.uploadFile(Arrays.asList(files));
+    public List<ImageResponseModel> upload(MultipartFile[] files) {
+        return fileUploadService.uploadFile(Arrays.asList(files));
     }
 
     @Override
-    public void upload(ImageModel model) {
+    public List<ImageResponseModel> upload(ImageModel model) {
         StringUploadService service = getUploadService(model.getType());
-        service.uploadFile(model.getCodes());
+        return service.uploadFile(model.getCodes());
     }
 
     private StringUploadService getUploadService(ImageSourceType type) {

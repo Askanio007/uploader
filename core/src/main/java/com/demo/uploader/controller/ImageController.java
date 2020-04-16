@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/images")
+@RequestMapping("api/v1/images")
 public class ImageController {
 
     private final ImageService imageService;
@@ -23,14 +23,12 @@ public class ImageController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Response> processFile(@RequestBody MultipartFile[] files){
-        imageService.upload(files);
-        return Response.ok("upload successfully");
+    public ResponseEntity<Response> processFile(@RequestBody MultipartFile[] files) {
+        return Response.ok(imageService.upload(files));
     }
 
-    @PostMapping(consumes = "application/json")
-    public ResponseEntity<Response> processJson(@RequestBody ImageModel imageModel){
-        imageService.upload(imageModel);
-        return Response.ok("upload successfully");
+    @PostMapping(consumes = {"application/json"})
+    public ResponseEntity<Response> processJson(@RequestBody ImageModel imageModel) {
+        return Response.ok(imageService.upload(imageModel));
     }
 }

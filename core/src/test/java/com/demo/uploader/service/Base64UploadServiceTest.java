@@ -1,6 +1,6 @@
 package com.demo.uploader.service;
 
-import com.demo.uploader.exception.IllegalBase64Exception;
+import com.demo.uploader.model.ImageResponseModel;
 import com.demo.uploader.service.impl.Base64UploadServiceImpl;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Assertions;
@@ -30,7 +30,10 @@ public class Base64UploadServiceTest extends BaseUploadServiceTest {
         codes.add(goodBase64);
         codes.add(goodBase64);
         codes.add(goodBase64);
-        base64UploadService.uploadFile(codes);
+        List<ImageResponseModel> results = base64UploadService.uploadFile(codes);
+        for (ImageResponseModel model : results) {
+            Assertions.assertTrue(model.isSuccess());
+        }
         checkCountFiles(3, base64UploadService.getFolderName());
     }
 
@@ -39,10 +42,11 @@ public class Base64UploadServiceTest extends BaseUploadServiceTest {
         List<String> codes = new ArrayList<>();
         codes.add(BAD_TEST_CODE);
 
-        Exception exception = Assertions.assertThrows(IllegalBase64Exception.class, () -> {
-            base64UploadService.uploadFile(codes);
-        });
-        Assertions.assertEquals(exception.getMessage(), "Incorrect base64: " + BAD_TEST_CODE);
+        List<ImageResponseModel> results = base64UploadService.uploadFile(codes);
+        for (ImageResponseModel model : results) {
+            Assertions.assertFalse(model.isSuccess());
+            Assertions.assertEquals("Incorrect base64: " + BAD_TEST_CODE, model.getError());
+        }
         checkCountFiles(0, "");
     }
 }

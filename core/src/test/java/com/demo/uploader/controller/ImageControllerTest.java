@@ -2,6 +2,7 @@ package com.demo.uploader.controller;
 
 import com.demo.uploader.http.Response;
 import com.demo.uploader.model.ImageModel;
+import com.demo.uploader.model.ImageResponseModel;
 import com.demo.uploader.model.ImageSourceType;
 import com.demo.uploader.service.ImageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,7 +16,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
+import java.util.List;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,7 +29,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ImageController.class)
 public class ImageControllerTest {
 
-    private final static Response CORRECT_RESPONSE = new Response(true, "upload successfully", null);
+    private final static List<ImageResponseModel> EXPECTED_LIST = Arrays.asList(
+            new ImageResponseModel(true, "test1", null),
+            new ImageResponseModel(true, "test2", null)
+    );
+    private final static Response EXPECTED_RESPONSE = new Response(true, EXPECTED_LIST, null);
+    private final static String API_URL = "/api/v1/images";
+
     @Autowired
     protected MockMvc mockMvc;
     @MockBean
@@ -36,13 +45,16 @@ public class ImageControllerTest {
     public void testStringUpload() throws Exception {
         ImageModel model = new ImageModel();
         model.setType(ImageSourceType.BASE64);
-        model.setCodes(Arrays.asList("test", "test"));
-        checkRequest(post("/images"), model, APPLICATION_JSON_VALUE);
+        model.setCodes(Arrays.asList("test1", "test2"));
+        when(imageService.upload(model)).thenReturn(EXPECTED_LIST);
+        checkRequest(post(API_URL), model, APPLICATION_JSON_VALUE);
     }
 
     @Test
     public void testFileUpload() throws Exception {
-        checkRequest(post("/images"), new MultipartFile[1], MULTIPART_FORM_DATA_VALUE);
+        MultipartFile[] files = new MultipartFile[0];
+        when(imageService.upload(files)).thenReturn(EXPECTED_LIST);
+        checkRequest(post(API_URL), files, MULTIPART_FORM_DATA_VALUE);
     }
 
     private void checkRequest(MockHttpServletRequestBuilder builder, Object body, String contentType) throws Exception {
@@ -54,7 +66,7 @@ public class ImageControllerTest {
         mockMvc.perform(builder)
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().json(toJson(CORRECT_RESPONSE)));
+                .andExpect(content().json(toJson(EXPECTED_RESPONSE)));
     }
 
     public static String toJson(Object ob) {

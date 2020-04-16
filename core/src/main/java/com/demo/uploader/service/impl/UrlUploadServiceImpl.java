@@ -10,6 +10,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 @Slf4j
 @Service("urlUploadService")
 public class UrlUploadServiceImpl extends UploadServiceImpl<String> implements StringUploadService {
@@ -19,7 +23,8 @@ public class UrlUploadServiceImpl extends UploadServiceImpl<String> implements S
     @Getter(AccessLevel.PROTECTED)
     private final String path;
 
-    public UrlUploadServiceImpl(@Value("${image.from.url.path}") String path) {
+    public UrlUploadServiceImpl(@Value("${image.from.url.path}") String path) throws IOException {
+        Files.createDirectories(Paths.get(path));
         this.path = path;
     }
 
@@ -34,5 +39,10 @@ public class UrlUploadServiceImpl extends UploadServiceImpl<String> implements S
                 .flatMap(res -> res.bodyToMono(ByteArrayResource.class))
                 .map(ByteArrayResource::getByteArray);
         writeFile(bytes.block());
+    }
+
+    @Override
+    protected String getSource(String image) {
+        return image;
     }
 }

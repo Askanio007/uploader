@@ -24,6 +24,10 @@ public class GracefulShutdown implements TomcatConnectorCustomizer, ApplicationL
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
+        if (this.connector == null) {
+            return;
+        }
+
         this.connector.pause();
         Executor executor = this.connector.getProtocolHandler().getExecutor();
         if (executor instanceof ThreadPoolExecutor) {

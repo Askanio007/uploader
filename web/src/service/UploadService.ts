@@ -1,6 +1,6 @@
 import axios, {AxiosRequestConfig} from "axios";
 
-const url = '/images';
+const url = '/api/v1/images';
 
 class UploadService {
 
