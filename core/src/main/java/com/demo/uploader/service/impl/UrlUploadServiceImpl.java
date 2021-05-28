@@ -30,6 +30,7 @@ public class UrlUploadServiceImpl extends UploadServiceImpl<String> implements S
 
     @Override
     protected void proceedUpload(String image) {
+        System.out.println("TEST");
         client = WebClient.builder()
                 .baseUrl(image)
                 .build();
