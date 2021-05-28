@@ -28,6 +28,8 @@ public class UrlUploadServiceImpl extends UploadServiceImpl<String> implements S
         this.path = path;
     }
 
+
+
     @Override
     protected void proceedUpload(String image) {
         client = WebClient.builder()
